@@ -7,11 +7,9 @@ from sklearn.model_selection import train_test_split
 
 
 """
-This file is for the Codeup example dataframes used in the SQL database. This file saves functions
+This file is for the Codeup example dataframes used in the mySQL database. This file saves functions
 to be resued as necessary, so that this code does not need to be copied or rewritten. These
-functions read the Titanic, Iris, and Telco data sets from the Codeup database. These functions indivdually read the 
-databases into a variable, and then clean and split them. Each function works only for it's individually named dataset 
-and can NOT be interchanged, since the cleaning process for each is unquie to the individual database.
+functions read the Telco dataset from the Codeup database, and return the requested output.
 """
 
 
@@ -19,9 +17,8 @@ and can NOT be interchanged, since the cleaning process for each is unquie to th
 
 def get_connection(database_name):
     '''
-    This function takes in as arguments the database, username, host, and password for 
-    the mysql database and returns a string that can be used to open a connection to the server
-    and query the db in the read_sql function. 
+    This function takes in a database name for the mysql database and returns 
+    a string that can be used to open a connection to the mySQL server.
     '''
     return f'mysql+pymysql://{user}:{password}@{host}/{database_name}'
 
@@ -31,7 +28,9 @@ def get_connection(database_name):
 def get_telco_data():
     '''
     This function reads the Telco data from the Codeup SQL database, writes data to
-    a csv file if a local file does not exist, and returns a dataframe.
+    a csv file if a local file does not exist, and returns a dataframe. The local file 
+    ensures that data can be accessed, even in the event that you cannot talk to the mySQL
+    database. 
     '''
     if os.path.isfile('telco.csv'):
         # If csv file exists read in data from csv file.
@@ -55,12 +54,11 @@ def get_telco_data():
 
 ###################### Clean and Split the Telco Data ######################
 
-def prep_telco(telco):
+def clean_telco(telco):
     """
     This function starts by changing total_charges from a string to a float. It then drops any duplicate information, and creates
     dummy variables for all of the categorical columns. The dummy variables are then concatinated to the base dataframe, which is 
-    then put through an extensive list of renaming most of the columns for easier manipulation. The data is then split and returned 
-    as three separate dataframes: 20% Test data, 24% Validation data, 56% Training data. 
+    then put through an extensive list of renaming most of the columns for easier manipulation. 
     """
     # Some total_charges are blank. I'm going to convert those to zero for now, or I won't be able to 
     # change the dtype of total_charges
@@ -68,10 +66,7 @@ def prep_telco(telco):
 
     # Total_Charges is currently a string, I want it to be a Float for future math
     telco["total_charges"]= telco["total_charges"].str.strip().replace(",","").replace("$","").astype(float)
-    
-    # Always drop them duplicates (if any)
-    telco = telco.drop_duplicates()
-
+   
     # Time to make a LOT of dummies for all the categorical columns
     telco_dummy1 = pd.get_dummies(
                                 telco[[ 'gender', 
@@ -151,8 +146,14 @@ def prep_telco(telco):
     telco = telco.rename(columns={"payment_type_Electronic check": "payment_type_electronic_check_M"})
     telco = telco.rename(columns={"payment_type_Mailed check": "payment_type_mailed_check_M"})
     telco = telco.rename(columns={"contract_type_Month-to-month": "month_to_month_contract"})
+    return telco
 
+def split_this_data (telco_df):
+    """
+    This function takes in a dataframe and splits it into three separate dataframes. 
+    20% for Test dataframe, 24% for Validation dataframe, 56% for Training dataframe. 
+    """
     # Splitting the data for testing!
-    train, test = train_test_split(telco, test_size = .2, random_state=22, stratify= telco.has_churned)
+    train, test = train_test_split(telco_df, test_size = .2, random_state=22, stratify= telco_df.has_churned)
     train, validate = train_test_split(train, test_size=.3, random_state=22, stratify= train.has_churned)
     return train, validate, test
