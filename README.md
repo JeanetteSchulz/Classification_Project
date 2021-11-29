@@ -1,11 +1,11 @@
-<img src="Images/telco.jpg" alt="Telco Logo" title="Telco Logo" width="300" height="300" align="center"/>
+<img src="Images/telco.jpg" alt="Telco Logo" title="Telco Logo" width="300" height="250" align="center"/>
     
 
-<div align="center">
+
 
 # README
 
-<div align="center">
+
 
 ### by Jeanette Schulz 2021-11-29
 
